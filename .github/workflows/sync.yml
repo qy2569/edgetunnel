@@ -31,20 +31,7 @@ jobs:
 
           # Set test_mode true to run tests instead of the true action!!
           test_mode: false
-      # Step 3: Restore excluded files (README.md and sync.yml)
-      - name: Restore excluded files (README.md and sync.yml)
-        run: |
-          echo "Restoring excluded files (README.md and sync.yml)..."
-          
-          # 如果上游没有更改过 README.md 和 .github/workflows/sync.yml，可以恢复
-          git checkout origin/cmliu/main -- README.md .github/workflows/sync.yml
-          
-          # 确保我们恢复的文件已正确加入版本控制
-          git add README.md .github/workflows/sync.yml
-          git commit -m "Restore README.md and sync.yml to their original state"
-          
-          # 推送到 fork
-          git push origin main
+
       - name: Sync check
         if: failure()
         run: |
