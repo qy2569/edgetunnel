@@ -32,6 +32,9 @@ jobs:
           # Set test_mode true to run tests instead of the true action!!
           test_mode: false
 
+# 新增：排除 README.md 和 sync.yml 文件
+          exclude: README.md,sync.yml
+          
       - name: Sync check
         if: failure()
         run: |
