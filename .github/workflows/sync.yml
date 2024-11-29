@@ -5,7 +5,7 @@ permissions:
 
 on:
   schedule:
-    - cron: "0 0 * * *" # every day
+    - cron: "0 0 * * *" # 每天一次
   workflow_dispatch:
 
 jobs:
@@ -27,14 +27,20 @@ jobs:
           upstream_sync_repo: cmliu/edgetunnel
           upstream_sync_branch: main
           target_sync_branch: main
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }} # automatically generated, no need to set
-
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }} # 自动生成的 GitHub token，无需设置
+          
           # Set test_mode true to run tests instead of the true action!!
           test_mode: false
 
-# 新增：排除 README.md 和 sync.yml 文件
-          exclude: README.md,.github/workflows/sync.yml
-          
+      # Step 3: Manually restore excluded files after sync
+      - name: Restore excluded files (README.md and sync.yml)
+        run: |
+          # Checkout the upstream branch and restore the excluded files
+          git checkout cmliu/edgetunnel/main -- README.md .github/workflows/sync.yml
+          git add README.md .github/workflows/sync.yml
+          git commit -m "Restore excluded files (README.md and sync.yml)"
+          git push origin main
+
       - name: Sync check
         if: failure()
         run: |
