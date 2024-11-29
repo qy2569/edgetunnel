@@ -33,7 +33,7 @@ jobs:
           test_mode: false
 
 # 新增：排除 README.md 和 sync.yml 文件
-          exclude: README.md,sync.yml
+          exclude: README.md,.github/workflows/sync.yml
           
       - name: Sync check
         if: failure()
