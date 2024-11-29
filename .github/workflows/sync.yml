@@ -15,11 +15,11 @@ jobs:
     if: ${{ github.event.repository.fork }}
 
     steps:
-      # Step 1: Checkout the target repo
+      # Step 1: Checkout target repo
       - name: Checkout target repo
         uses: actions/checkout@v3
 
-      # Step 2: Sync upstream changes
+      # Step 2: Sync upstream changes (excluding specific files)
       - name: Sync upstream changes
         id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
@@ -30,33 +30,22 @@ jobs:
           target_repo_token: ${{ secrets.GITHUB_TOKEN }} # 自动生成的 GitHub token，无需设置
           test_mode: false
 
-      # Step 3: Debugging - Check repository status and branches
-      - name: Debug repository status and remote
-        run: |
-          echo "==== Checking repository status ===="
-          git status
-          echo "==== Listing all remote repositories ===="
-          git remote -v
-          echo "==== Fetching all branches ===="
-          git fetch --all
-          echo "==== Listing all branches ===="
-          git branch -a
-          echo "==== Checking remote branches ===="
-          git branch -r
-          echo "==== Checking commit history ===="
-          git log --oneline --graph --all
-
-      # Step 4: Restore excluded files (README.md and sync.yml)
+      # Step 3: Restore excluded files (README.md and sync.yml)
       - name: Restore excluded files (README.md and sync.yml)
         run: |
-          echo "Restoring excluded files..."
-          git fetch origin cmliu/main
+          echo "Restoring excluded files (README.md and sync.yml)..."
+          
+          # 如果上游没有更改过 README.md 和 .github/workflows/sync.yml，可以恢复
           git checkout origin/cmliu/main -- README.md .github/workflows/sync.yml
+          
+          # 确保我们恢复的文件已正确加入版本控制
           git add README.md .github/workflows/sync.yml
-          git commit -m "Restore excluded files (README.md and sync.yml)"
+          git commit -m "Restore README.md and sync.yml to their original state"
+          
+          # 推送到 fork
           git push origin main
 
-      # Step 5: Sync check (Error handling)
+      # Step 4: Sync check (Error handling)
       - name: Sync check
         if: failure()
         run: |
