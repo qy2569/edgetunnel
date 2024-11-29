@@ -15,11 +15,11 @@ jobs:
     if: ${{ github.event.repository.fork }}
 
     steps:
-      # Step 1: run a standard checkout action
+      # Step 1: Checkout the target repo
       - name: Checkout target repo
         uses: actions/checkout@v3
 
-      # Step 2: run the sync action
+      # Step 2: Sync upstream changes
       - name: Sync upstream changes
         id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
@@ -28,22 +28,29 @@ jobs:
           upstream_sync_branch: main
           target_sync_branch: main
           target_repo_token: ${{ secrets.GITHUB_TOKEN }} # 自动生成的 GitHub token，无需设置
-          
-          # Set test_mode true to run tests instead of the true action!!
           test_mode: false
 
-      # Step 3: Manually restore excluded files after sync
+      # Step 3: Debugging - Check repository status and branches
+      - name: Check repo status
+        run: |
+          echo "Checking the status of the repository..."
+          git status
+          echo "Listing branches..."
+          git branch -a
+
+      # Step 4: Restore excluded files (README.md and sync.yml)
       - name: Restore excluded files (README.md and sync.yml)
         run: |
-          # Checkout the upstream branch and restore the excluded files
-          git checkout cmliu/edgetunnel/main -- README.md .github/workflows/sync.yml
+          echo "Restoring excluded files..."
+          git fetch origin cmliu/main
+          git checkout origin/cmliu/main -- README.md .github/workflows/sync.yml
           git add README.md .github/workflows/sync.yml
           git commit -m "Restore excluded files (README.md and sync.yml)"
           git push origin main
 
+      # Step 5: Sync check (Error handling)
       - name: Sync check
         if: failure()
         run: |
-          echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次，详细教程请查看项目README.md "
-          echo "[Error] Due to a change in the workflow file of the upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork. Please refer to the project README.md for instructions. "
-          exit 1
+          echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次，详细教程请查看项目README.md"
+          echo "[Error] Due to a change in the workflow file of the upstream repository, GitHub has automa
