@@ -31,12 +31,20 @@ jobs:
           test_mode: false
 
       # Step 3: Debugging - Check repository status and branches
-      - name: Check repo status
+      - name: Debug repository status and remote
         run: |
-          echo "Checking the status of the repository..."
+          echo "==== Checking repository status ===="
           git status
-          echo "Listing branches..."
+          echo "==== Listing all remote repositories ===="
+          git remote -v
+          echo "==== Fetching all branches ===="
+          git fetch --all
+          echo "==== Listing all branches ===="
           git branch -a
+          echo "==== Checking remote branches ===="
+          git branch -r
+          echo "==== Checking commit history ===="
+          git log --oneline --graph --all
 
       # Step 4: Restore excluded files (README.md and sync.yml)
       - name: Restore excluded files (README.md and sync.yml)
@@ -53,4 +61,5 @@ jobs:
         if: failure()
         run: |
           echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次，详细教程请查看项目README.md"
-          echo "[Error] Due to a change in the workflow file of the upstream repository, GitHub has automa
+          echo "[Error] Due to a change in the workflow file of the upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork. Please refer to the project README.md for instructions."
+          exit 1
