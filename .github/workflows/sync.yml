@@ -11,13 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.repository.fork }}
     steps:
-      # Step 1: run a standard checkout action
       - name: Checkout target repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # This ensures we fetch the full history
+          fetch-depth: 0
 
-      # Step 2: run the sync action with custom sync options
       - name: Sync upstream changes
         id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
@@ -26,9 +24,11 @@ jobs:
           upstream_sync_branch: main
           target_sync_branch: main
           target_repo_token: ${{ secrets.GITHUB_TOKEN }}
-          # Add extra options to exclude specific files
-          sync_args: "--exclude README.md --exclude .github/workflows/sync.yml"
           test_mode: false
+
+      - name: Restore specific files
+        run: |
+          git checkout HEAD^ -- README.md .github/workflows/sync.yml || true
 
       - name: Sync check
         if: failure()
